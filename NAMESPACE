@@ -1,0 +1,5 @@
+import(lsmeans)
+import(StepReg)
+importFrom("stats", "anova", "as.formula", "deviance", "df.residual","fitted", "lm", "resid", "rnorm", "predict", "shapiro.test")
+importFrom("utils", "write.table")
+exportPattern("^[[:alpha:]]+")
