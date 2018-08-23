@@ -9,13 +9,13 @@ Joint Mapping for QTN, it combines composite interval mapping(CIM) and regressio
 
 * What is the main features in SteReg?
 
-* * Missing marker genotype estimation: Hidden Markov model based on genotype frequency for different mapping population(RIL, F2, Fn, BCP1, BCP2, DH)
+** Missing marker genotype estimation: Hidden Markov model based on genotype frequency for different mapping population(RIL, F2, Fn, BCP1, BCP2, DH)
 
-* * Linear model selection (stepwise regression) programmed with Cpp: (1)Variable enter direction: forward stepwise selection and hybrid approaches (2)Information criteria: AIC/AICc/BIC/SBC/HQ and Significant Level (3)Multicollinearity: tolerance and VIF (4)Independent variables: continuous effects and continuous-nesting-class effects (5)Dependent variables: univariate and multivariate
+** Linear model selection (stepwise regression) programmed with Cpp: (1)Variable enter direction: forward stepwise selection and hybrid approaches (2)Information criteria: AIC/AICc/BIC/SBC/HQ and Significant Level (3)Multicollinearity: tolerance and VIF (4)Independent variables: continuous effects and continuous-nesting-class effects (5)Dependent variables: univariate and multivariate
 
-* * P/LOD value calculation(likelihood ratio test): (1)F test for univariate based on full and reduced linear models (2)Approximate F test for multivariate based on Wilks' lambda, Pillai’s' Trace and Hotelling-Lawley Trace with full and reduced linear models
+** P/LOD value calculation(likelihood ratio test): (1)F test for univariate based on full and reduced linear models (2)Approximate F test for multivariate based on Wilks' lambda, Pillai’s' Trace and Hotelling-Lawley Trace with full and reduced linear models
 
-* * Resample:(1)Permutation test (2)bootstrap and (3)cross-validation
+** Resample:(1)Permutation test (2)bootstrap and (3)cross-validation
 
 ## 3. Usage and Examples
 	#install.package("JM4QTN")
@@ -45,10 +45,12 @@ Joint Mapping for QTN, it combines composite interval mapping(CIM) and regressio
 	RMdata_2[1:10,1:20];dim(RMdata_2)
 
 	# QTL scan
+	
 	vecPheno <- c("newEC1","newEC2")
 	#vecPheno <- c("newEC1")
 	croType <- "RIL"
 	GenoData_QTL <- GenoData_S2
+	
 	#permutation test
 	vecThrVal <- ptJM1(vecPheno,PhenoData,GenoData_EST,method,npt=100,alpha=0.1,selection="stepwise",tolerance=1e-7,Trace="Pillai",select="SBC",sle=0.05,sls=0.05,Choose="SBC")
 	#vecThrVal <- c(0.0001,0.0001,3.3,3.2)
@@ -56,8 +58,8 @@ Joint Mapping for QTN, it combines composite interval mapping(CIM) and regressio
 	JM(vecPheno,vecH2,PhenoData,method,vecThrVal,GenoData_EST,GenoData_QTL)
 	
 	# Pleiotropic QTL detection
-	vecThrVal <- ptLP1(vecPheno,PhenoData,GenoData_EST,npt=100,alpha=0.1,selection="stepwise",tolerance=1e-7,Trace="Pillai",select="SBC",sle=0.05,sls=0.05,Choose="SBC")
 	
+	vecThrVal <- ptLP1(vecPheno,PhenoData,GenoData_EST,npt=100,alpha=0.1,selection="stepwise",tolerance=1e-7,Trace="Pillai",select="SBC",sle=0.05,sls=0.05,Choose="SBC")
 	CChr <- 2
 	#vecThrVal <- c(0.000206,4.62,4.70,6.64)
 	Interval <- c(56.896,57.237,57.237,61.323)
