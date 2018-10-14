@@ -11,7 +11,7 @@
 
 (2) Threshold of LOD and p value calculation
 
-(3) QTL scan
+(3) QTL scan for multiple-line cross population
 
 (4) Pleiotropic and linked QTL detection
 
