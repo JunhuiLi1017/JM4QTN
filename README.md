@@ -1,9 +1,15 @@
-# JM4QTN
+# JM4QTN:Joint Map for QTN
 ## 1. Introduction
 
 * What is the package JM4QTN?
 
-Joint Mapping for QTN, it combines composite interval mapping(CIM) and regression analysis to do association mapping and linkage mapping and identify pleiotropic or linked QTL in multiple-traits both in single or multiple line cross populations. It can also compute conditional probability of missing marker genotype using flanking markers. Thresholds are determined by permutation test and parametric bootstrap test. Stepwise regression with multivariate and univariate is carried out with several information criteria to select cofactors across families.
+** Joint Mapping for QTN, it combines composite interval mapping(CIM) and regression analysis to do association mapping and linkage mapping and identify pleiotropic or linked QTL in multiple-traits both in single or multiple line cross populations. It can also compute conditional probability of missing marker genotype using flanking markers. Thresholds are determined by permutation test and parametric bootstrap test. Stepwise regression with multivariate and univariate is carried out with several information criteria to select cofactors across families.
+
+** The main module in this package
+(1) Missing marker genotype estimation based on different mapping population(RIL, F2, Fn, BCP1, BCP2, DH)
+(2) Threshold of LOD and p value calculation
+(3) QTL scan
+(4) Pleiotropic and linked QTL detection
 
 ## 2. Statistical and coding details in this package
 
@@ -44,21 +50,20 @@ Joint Mapping for QTN, it combines composite interval mapping(CIM) and regressio
 	RMdata_2 <- calGenoProb(GeneticMap,MarkerData,method,cross,steps)
 	RMdata_2[1:10,1:20];dim(RMdata_2)
 
-	# QTL scan
 	
+	#permutation test
 	vecPheno <- c("newEC1","newEC2")
 	#vecPheno <- c("newEC1")
 	croType <- "RIL"
 	GenoData_QTL <- GenoData_S2
-	
-	#permutation test
 	vecThrVal <- ptJM1(vecPheno,PhenoData,GenoData_EST,method,npt=100,alpha=0.1,selection="stepwise",tolerance=1e-7,Trace="Pillai",select="SBC",sle=0.05,sls=0.05,Choose="SBC")
 	#vecThrVal <- c(0.0001,0.0001,3.3,3.2)
+	
+	# QTL scan
 	vecH2 <- c(0.8,0.8)
 	JM(vecPheno,vecH2,PhenoData,method,vecThrVal,GenoData_EST,GenoData_QTL)
 	
 	# Pleiotropic QTL detection
-	
 	vecThrVal <- ptLP1(vecPheno,PhenoData,GenoData_EST,npt=100,alpha=0.1,selection="stepwise",tolerance=1e-7,Trace="Pillai",select="SBC",sle=0.05,sls=0.05,Choose="SBC")
 	CChr <- 2
 	#vecThrVal <- c(0.000206,4.62,4.70,6.64)
