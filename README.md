@@ -6,14 +6,15 @@
 ** Joint Mapping for QTN, it combines composite interval mapping(CIM) and regression analysis to do association mapping and linkage mapping and identify pleiotropic or linked QTL in multiple-traits both in single or multiple line cross populations. It can also compute conditional probability of missing marker genotype using flanking markers. Thresholds are determined by permutation test and parametric bootstrap test. Stepwise regression with multivariate and univariate is carried out with several information criteria to select cofactors across families.
 
 ** The main module in this package
+(1) Best Linear Unbiased Eestimation of Phenotype 
 
-(1) Missing marker genotype estimation based on different mapping population(RIL, F2, Fn, BCP1, BCP2, DH)
+(2) Missing marker genotype estimation based on different mapping population(RIL, F2, Fn, BCP1, BCP2, DH)
 
-(2) Threshold of LOD and p value calculation
+(3) Threshold of LOD and p value calculation
 
-(3) QTL scan for multiple-line cross population
+(4) QTL scan for multiple-line cross population
 
-(4) Pleiotropic and linked QTL detection
+(5) Pleiotropic and linked QTL detection
 
 ## 2. Statistical and coding details in this package
 
