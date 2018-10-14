@@ -3,7 +3,7 @@ Type: Package
 Title: Joint Mapping for QTN
 Version: 1.0.0
 Date: 2018-06-07
-Author: Junhui Li,GuoLiang Li,Heli Chen,Kun Cheng,Wenxin Liu
+Author: Junhui Li,Kun Cheng,Wenxin Liu
 Maintainer: Junhui Li <junhuili@cau.edu.cn>
 Description: Joint Mapping for QTN, it combines composite interval mapping(CIM) and regression analysis to do association mapping and linkage mapping and identify pleiotropic or linked QTL in multiple-traits both in single or multiple line cross populations. It can also compute conditional probability of missing marker genotype using flanking markers. Thresholds are determined by permutation test and parametric bootstrap test. Stepwise regression with multivariate and univariate is carried out with several information criteria to select cofactors across families.
 License: GPL (>= 2)
