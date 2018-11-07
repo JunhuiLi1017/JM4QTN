@@ -19,7 +19,7 @@
 
 ## 2. Statistical and coding details in this package
 
-* What is the main features in ?
+* What is the main features in JM4QTN?
 
 ** Missing marker genotype estimation: Hidden Markov model based on genotype frequency for different mapping population(RIL, F2, Fn, BCP1, BCP2, DH)
 
