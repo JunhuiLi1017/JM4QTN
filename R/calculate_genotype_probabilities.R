@@ -1,4 +1,122 @@
-calGenoProb <- function(GeneticMap,GenoData,method,croType=NULL,steps=0,Gn=2){
+#' Calculate Genotype Probabilities and Impute Missing Data
+#' 
+#' Calculates genotype probabilities and imputes missing genotype data for genetic mapping studies.
+#' Supports both Association Mapping (AM) and Linkage Mapping (LM) methods with comprehensive
+#' missing data handling and virtual marker creation capabilities.
+#' 
+#' @param GeneticMap A data frame containing genetic map information with columns:
+#'   \itemize{
+#'     \item \code{marker}: Marker names (character)
+#'     \item \code{chr}: Chromosome numbers (numeric or factor)
+#'     \item \code{pos}: Genetic positions in centimorgans (numeric)
+#'   }
+#' @param GenoData A matrix or data frame containing genotype data with individuals as rows 
+#'   and markers as columns. Genotype codes:
+#'   \itemize{
+#'     \item \code{0}: Homozygous for reference allele
+#'     \item \code{1}: Heterozygous
+#'     \item \code{2}: Homozygous for alternative allele
+#'     \item \code{9} or \code{NA}: Missing data
+#'   }
+#' @param method Character string specifying the mapping method:
+#'   \itemize{
+#'     \item \code{"AM"}: Association Mapping - combines map with genotype data
+#'     \item \code{"LM"}: Linkage Mapping - performs missing data imputation
+#'   }
+#' @param croType Character string specifying the cross type for LM method. Required when \code{method="LM"}:
+#'   \itemize{
+#'     \item \code{"RIL"}: Recombinant Inbred Lines
+#'     \item \code{"DH"}: Doubled Haploids
+#'     \item \code{"F2"}: F2 population
+#'     \item \code{"BCP1"}: Backcross to Parent 1
+#'     \item \code{"BCP2"}: Backcross to Parent 2
+#'     \item \code{"Fn"}: Advanced generation (n > 2)
+#'   }
+#' @param steps Numeric value specifying the step size (in cM) for virtual marker creation in LM.
+#'   If 0, no virtual markers are created. Default is 0.
+#' @param Gn Numeric value specifying the generation number for advanced populations.
+#'   Must be greater than 1. Default is 2.
+#' 
+#' @return A data frame containing the processed genotype data with genetic map information
+#'   and calculated genotype probabilities. The structure depends on the method:
+#'   \itemize{
+#'     \item \strong{AM method}: Original data combined with genetic map
+#'     \item \strong{LM method}: Imputed genotype data with probabilities and optional virtual markers
+#'   }
+#' 
+#' @details This function provides comprehensive genotype data processing for genetic mapping:
+#' 
+#' \strong{Association Mapping (AM):}
+#' \itemize{
+#'   \item Simply combines genetic map with genotype data
+#'   \item Converts missing values to code 9
+#'   \item No imputation performed
+#' }
+#' 
+#' \strong{Linkage Mapping (LM):}
+#' \itemize{
+#'   \item Validates genotype codes based on cross type expectations
+#'   \item Imputes missing genotypes using flanking marker information
+#'   \item Creates virtual markers at specified intervals when \code{steps > 0}
+#'   \item Uses Haldane mapping function for recombination calculations
+#'   \item Applies cross-type specific genotype probability calculations
+#' }
+#' 
+#' \strong{Cross Type Genotype Expectations:}
+#' \itemize{
+#'   \item \code{RIL/DH}: Only codes 0 and 2 allowed
+#'   \item \code{F2}: Codes 0, 1, and 2 allowed
+#'   \item \code{BCP1/BCP2}: Codes 0, 1, and 2 with specific constraints
+#'   \item \code{Fn}: Codes 0, 1, and 2 for advanced generations
+#' }
+#' 
+#' \strong{Virtual Marker Creation:}
+#' When \code{steps > 0}, virtual markers are created at regular intervals between
+#' existing markers to improve mapping resolution and handle large gaps in the genetic map.
+#' 
+#' @examples
+#' # Example genetic map
+#' genetic_map <- data.frame(
+#'   marker = c("M1", "M2", "M3", "M4", "M5"),
+#'   chr = c(1, 1, 1, 1, 1),
+#'   pos = c(0, 10, 25, 40, 50)
+#' )
+#' 
+#' # Example genotype data with missing values
+#' geno_data <- matrix(
+#'   c(2, 0, NA, 1, 2,
+#'     1, 0, 2, NA, 0,
+#'     2, 1, 0, 2, 1,
+#'     0, NA, 1, 0, 2),
+#'   nrow = 4, ncol = 5,
+#'   dimnames = list(c("Ind1", "Ind2", "Ind3", "Ind4"), 
+#'                   c("M1", "M2", "M3", "M4", "M5"))
+#' )
+#' 
+#' # Association mapping (no imputation)
+#' result_am <- calculate_genotype_probabilities(genetic_map, geno_data, method = "AM")
+#' 
+#' # Linkage mapping for F2 population with imputation
+#' result_lm <- calculate_genotype_probabilities(genetic_map, geno_data, method = "LM", 
+#'                         croType = "F2", steps = 0)
+#' 
+#' # Linkage mapping with virtual marker creation
+#' result_lm_vm <- calculate_genotype_probabilities(genetic_map, geno_data, method = "LM", 
+#'                            croType = "F2", steps = 5)
+#' 
+#' # RIL population example
+#' result_ril <- calculate_genotype_probabilities(genetic_map, geno_data, method = "LM", 
+#'                          croType = "RIL", steps = 0)
+#' 
+#' @seealso \code{\link{haldane_mapping_function}} for recombination fraction calculations,
+#'          \code{\link{calculate_expected_genotype_distribution}} for expected genotype probabilities
+#' 
+#' @references
+#' Haldane, J.B.S. (1919). The combination of linkage values and the calculation of 
+#' distances between the loci of linked factors. Journal of Genetics, 8(3), 299-309.
+#' 
+#' @export
+calculate_genotype_probabilities <- function(GeneticMap,GenoData,method,croType=NULL,steps=0,Gn=2){
     if(nrow(GeneticMap) != ncol(GenoData)){
       stop("Marker No. in geneticMap and GenoData must be equal\n")
     }
@@ -57,28 +175,28 @@ calGenoProb <- function(GeneticMap,GenoData,method,croType=NULL,steps=0,Gn=2){
                 }
                 if(jL==1 & GenoData[nS,names(Chr_R)[jL]] %in% NA){
                   xb <- as.numeric(Chr_R[jR]-Chr_R[j])
-                  rb <- HaldaneMap(xb/100)
+                  rb <- haldane_mapping_function(xb/100)
                   if(croType != "BCP2" & GenoData[nS,names(Chr_R)[jR]] %in% 2){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("N2",croType,Gn,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("N2",croType,Gn,rb),digits=3)+1
                   }
                   if(croType != "DH" & croType != "RIL"& GenoData[nS,names(Chr_R)[jR]] %in% 1){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("N1",croType,Gn,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("N1",croType,Gn,rb),digits=3)+1
                   }
                   if(croType != "BCP1"& GenoData[nS,names(Chr_R)[jR]] %in% 0){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("N0",croType,Gn,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("N0",croType,Gn,rb),digits=3)+1
                   }
                 }
                 if(jR==length(Chr_R) & GenoData[nS,names(Chr_R)[jR]] %in% NA){
                   xa <- as.numeric(Chr_R[j]-Chr_R[jL])
-                  ra <- HaldaneMap(xa/100)
+                  ra <- haldane_mapping_function(xa/100)
                   if (croType != "BCP2" & GenoData[nS,names(Chr_R)[jL]] %in% 2){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("2N",croType,Gn,ra),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("2N",croType,Gn,ra),digits=3)+1
                   }
                   if (croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 1){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("1N",croType,Gn,ra),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("1N",croType,Gn,ra),digits=3)+1
                   }
                   if (croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 0){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("0N",croType,Gn,ra),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("0N",croType,Gn,ra),digits=3)+1
                   }
                 }
                 #No 1st and last missing marker
@@ -86,34 +204,34 @@ calGenoProb <- function(GeneticMap,GenoData,method,croType=NULL,steps=0,Gn=2){
                   #else{
                   xa <- as.numeric(Chr_R[j]-Chr_R[jL])
                   xb <- as.numeric(Chr_R[jR]-Chr_R[j])
-                  ra <- HaldaneMap(xa/100)
-                  rb <- HaldaneMap(xb/100)
+                  ra <- haldane_mapping_function(xa/100)
+                  rb <- haldane_mapping_function(xb/100)
                   if (croType != "BCP2" & GenoData[nS,names(Chr_R)[jL]] %in% 2 & GenoData[nS,names(Chr_R)[jR]] %in% 2){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("22",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("22",croType,Gn,ra,rb),digits=3)+1
                   }
                   if (croType != "BCP2" & croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 2 & GenoData[nS,names(Chr_R)[jR]] %in% 1){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("21",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("21",croType,Gn,ra,rb),digits=3)+1
                   }
                   if (croType != "BCP2" & croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 2 & GenoData[nS,names(Chr_R)[jR]] %in% 0){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("20",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("20",croType,Gn,ra,rb),digits=3)+1
                   }
                   if (croType != "BCP2" & croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 1 & GenoData[nS,names(Chr_R)[jR]] %in% 2){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("12",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("12",croType,Gn,ra,rb),digits=3)+1
                   }
                   if (croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 1 & GenoData[nS,names(Chr_R)[jR]] %in% 1){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("11",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("11",croType,Gn,ra,rb),digits=3)+1
                   }
                   if (croType != "BCP1" & croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 1 & GenoData[nS,names(Chr_R)[jR]] %in% 0){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("10",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("10",croType,Gn,ra,rb),digits=3)+1
                   }
                   if (croType != "BCP2" & croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 0 & GenoData[nS,names(Chr_R)[jR]] %in% 2){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("02",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("02",croType,Gn,ra,rb),digits=3)+1
                   }
                   if (croType != "BCP1" & croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 0 & GenoData[nS,names(Chr_R)[jR]] %in% 1){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("01",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("01",croType,Gn,ra,rb),digits=3)+1
                   }
                   if (croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 0 & GenoData[nS,names(Chr_R)[jR]] %in% 0){
-                    VMmatrix[nS,names(Chr_R)[j]] <- round(Eagd("00",croType,Gn,ra,rb),digits=3)+1
+                    VMmatrix[nS,names(Chr_R)[j]] <- round(calculate_expected_genotype_distribution("00",croType,Gn,ra,rb),digits=3)+1
                   }
                 } 
               }
@@ -216,29 +334,29 @@ calGenoProb <- function(GeneticMap,GenoData,method,croType=NULL,steps=0,Gn=2){
                   #the 1st missing marker 
                   if(jL==1 & GenoData[nS,names(Chr_R)[jL]] %in% NA){
                     xb <- as.numeric(Chr_R[jR]-Chr_V[jv])
-                    rb <- HaldaneMap(xb/100)
+                    rb <- haldane_mapping_function(xb/100)
                     if(croType != "BCP2" & GenoData[nS,names(Chr_R)[jR]] %in% 2){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("N2",croType,Gn,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("N2",croType,Gn,rb),digits=3)+1
                     }
                     if(croType != "DH" & croType != "RIL"& GenoData[nS,names(Chr_R)[jR]] %in% 1){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("N1",croType,Gn,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("N1",croType,Gn,rb),digits=3)+1
                     }
                     if(croType != "BCP1"& GenoData[nS,names(Chr_R)[jR]] %in% 0){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("N0",croType,Gn,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("N0",croType,Gn,rb),digits=3)+1
                     }
                   }
                   #the last missing marker
                   if(jR==length(Chr_R) & GenoData[nS,names(Chr_R)[jR]] %in% NA){
                     xa <- as.numeric(Chr_V[jv]-Chr_R[jL])
-                    ra <- HaldaneMap(xa/100)
+                    ra <- haldane_mapping_function(xa/100)
                     if (croType != "BCP2" & GenoData[nS,names(Chr_R)[jL]] %in% 2){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("2N",croType,Gn,ra),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("2N",croType,Gn,ra),digits=3)+1
                     }
                     if (croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 1){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("1N",croType,Gn,ra),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("1N",croType,Gn,ra),digits=3)+1
                     }
                     if (croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 0){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("0N",croType,Gn,ra),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("0N",croType,Gn,ra),digits=3)+1
                     }
                   }
                   #No 1st and last missing marker
@@ -246,34 +364,34 @@ calGenoProb <- function(GeneticMap,GenoData,method,croType=NULL,steps=0,Gn=2){
                     #else{
                     xa <- as.numeric(Chr_V[jv]-Chr_R[jL])
                     xb <- as.numeric(Chr_R[jR]-Chr_V[jv])
-                    ra <- HaldaneMap(xa/100)
-                    rb <- HaldaneMap(xb/100)
+                    ra <- haldane_mapping_function(xa/100)
+                    rb <- haldane_mapping_function(xb/100)
                     if (croType != "BCP2" & GenoData[nS,names(Chr_R)[jL]] %in% 2 & GenoData[nS,names(Chr_R)[jR]] %in% 2){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("22",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("22",croType,Gn,ra,rb),digits=3)+1
                     }
                     if (croType != "BCP2" & croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 2 & GenoData[nS,names(Chr_R)[jR]] %in% 1){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("21",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("21",croType,Gn,ra,rb),digits=3)+1
                     }
                     if (croType != "BCP2" & croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 2 & GenoData[nS,names(Chr_R)[jR]] %in% 0){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("20",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("20",croType,Gn,ra,rb),digits=3)+1
                     }
                     if (croType != "BCP2" & croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 1 & GenoData[nS,names(Chr_R)[jR]] %in% 2){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("12",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("12",croType,Gn,ra,rb),digits=3)+1
                     }
                     if (croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 1 & GenoData[nS,names(Chr_R)[jR]] %in% 1){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("11",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("11",croType,Gn,ra,rb),digits=3)+1
                     }
                     if (croType != "BCP1" & croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 1 & GenoData[nS,names(Chr_R)[jR]] %in% 0){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("10",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("10",croType,Gn,ra,rb),digits=3)+1
                     }
                     if (croType != "BCP2" & croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 0 & GenoData[nS,names(Chr_R)[jR]] %in% 2){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("02",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("02",croType,Gn,ra,rb),digits=3)+1
                     }
                     if (croType != "BCP1" & croType != "DH" & croType != "RIL" & GenoData[nS,names(Chr_R)[jL]] %in% 0 & GenoData[nS,names(Chr_R)[jR]] %in% 1){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("01",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("01",croType,Gn,ra,rb),digits=3)+1
                     }
                     if (croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 0 & GenoData[nS,names(Chr_R)[jR]] %in% 0){
-                      VMmatrix[nS,names(Chr_V)[jv]] <- round(Eagd("00",croType,Gn,ra,rb),digits=3)+1
+                      VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("00",croType,Gn,ra,rb),digits=3)+1
                     }
                   }
                 }

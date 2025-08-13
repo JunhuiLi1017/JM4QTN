@@ -1,4 +1,95 @@
-FreGeno <-
+#' Genotype Frequency Calculator for Genetic Populations
+#' 
+#' Calculates genotype frequencies for different cross types and generations in genetic mapping studies.
+#' This function implements complex recurrence relations to compute genotype frequencies in various
+#' genetic populations including Fn, backcross, and advanced generation populations.
+#' 
+#' @param CrosType Character string specifying the cross type:
+#'   \itemize{
+#'     \item \code{"Fn"}: F-n generation populations (n > 2)
+#'     \item \code{"BCP1"}: Backcross to parent 1 populations
+#'     \item \code{"BCP2"}: Backcross to parent 2 populations
+#'     \item \code{"F2"}: F2 generation populations
+#'     \item \code{"DH"}: Doubled haploid populations
+#'     \item \code{"RIL"}: Recombinant inbred line populations
+#'   }
+#' @param Gn Numeric value specifying the generation number. Must be greater than 1.
+#' @param i Numeric value specifying the genotype index to calculate frequency for.
+#'   The valid range depends on the cross type:
+#'   \itemize{
+#'     \item \code{"Fn"}: 1-20 (20 different genotype classes)
+#'     \item \code{"BCP1/BCP2"}: 1-8 (8 genotype classes)
+#'     \item \code{"F2"}: 1-9 (9 genotype classes)
+#'   }
+#' @param x Numeric value representing recombination fraction between loci A and Q.
+#'   Must be between 0 and 0.5.
+#' @param y Numeric value representing recombination fraction between loci Q and B.
+#'   Must be between 0 and 0.5. Default is 0.
+#' 
+#' @return A numeric value representing the frequency of the specified genotype in the given generation.
+#'   The result is always between 0 and 1.
+#' 
+#' @details This function calculates genotype frequencies using sophisticated mathematical models:
+#' 
+#' \strong{For Fn Populations (y > 0):}
+#' \itemize{
+#'   \item Handles 20 different genotype classes with complex recurrence relations
+#'   \item Accounts for recombination between three loci (A, Q, B)
+#'   \item Uses the relationship \eqn{z = x + y - 2xy} for flanking marker recombination
+#'   \item Implements generation-by-generation frequency calculations
+#' }
+#' 
+#' \strong{For BCP1 Populations:}
+#' \itemize{
+#'   \item Handles 8 genotype classes
+#'   \item Backcross to the first parent (AAQQBB)
+#'   \item Specific recurrence relations for each genotype class
+#' }
+#' 
+#' \strong{For BCP2 Populations:}
+#' \itemize{
+#'   \item Handles 8 genotype classes
+#'   \item Backcross to the second parent (aaqqbb)
+#'   \item Different initial conditions and recurrence relations
+#' }
+#' 
+#' \strong{For F2 Populations (y = 0):}
+#' \itemize{
+#'   \item Handles 9 genotype classes
+#'   \item Simplified two-locus model
+#'   \item Standard F2 generation frequencies
+#' }
+#' 
+#' \strong{Mathematical Foundation:}
+#' The function uses recurrence relations to calculate genotype frequencies across generations.
+#' For each generation, the frequency of each genotype class is computed based on the
+#' frequencies in the previous generation and the recombination fractions between loci.
+#' 
+#' @examples
+#' # Calculate frequency for F2 generation, genotype 1, with recombination fraction 0.1
+#' freq_f2 <- calculate_genotype_frequencies("Fn", Gn = 2, i = 1, x = 0.1, y = 0)
+#' 
+#' # Calculate frequency for BCP1 generation, genotype 5, with recombination fractions
+#' freq_bcp1 <- calculate_genotype_frequencies("BCP1", Gn = 3, i = 5, x = 0.15, y = 0.25)
+#' 
+#' # Calculate frequency for Fn generation, genotype 10, with recombination fractions
+#' freq_fn <- calculate_genotype_frequencies("Fn", Gn = 4, i = 10, x = 0.2, y = 0.3)
+#' 
+#' # Calculate frequency for BCP2 generation, genotype 3
+#' freq_bcp2 <- calculate_genotype_frequencies("BCP2", Gn = 2, i = 3, x = 0.1, y = 0.2)
+#' 
+#' # Example with different generation numbers
+#' freq_gen3 <- calculate_genotype_frequencies("Fn", Gn = 3, i = 1, x = 0.1, y = 0)
+#' freq_gen5 <- calculate_genotype_frequencies("Fn", Gn = 5, i = 1, x = 0.1, y = 0)
+#' 
+#' @seealso \code{\link{calculate_expected_genotype_distribution}} for expected allele genotype distribution calculations
+#' 
+#' @references
+#' Haldane, J.B.S. (1919). The combination of linkage values and the calculation of 
+#' distances between the loci of linked factors. Journal of Genetics, 8(3), 299-309.
+#' 
+#' @export
+calculate_genotype_frequencies <-
 function(CrosType,Gn=2,i,x,y=0){
   if(Gn<=1){
     stop(" Gn should > 0")
@@ -138,7 +229,7 @@ function(CrosType,Gn=2,i,x,y=0){
         # Ab/Ab
         mtGeFre[g,7] <- 0.25*(2*mtGeFre[g-1,8]+4*mtGeFre[g-1,7]+x^2*mtGeFre[g-1,5]+mtGeFre[g-1,4])
         # AB/Ab
-        mtGeFre[g,8] <- 0.25*(2*mtGeFre[g-1,28]+x*(1-x)*mtGeFre[g-1,5])
+        mtGeFre[g,8] <- 0.25*(2*mtGeFre[g-1,8]+x*(1-x)*mtGeFre[g-1,5])
         # ab/ab
         mtGeFre[g,9] <- 0.25*(4*mtGeFre[g-1,9]+mtGeFre[g-1,8]+mtGeFre[g-1,6]+(1-x)^2*mtGeFre[g-1,5])
         rval <- mtGeFre[Gn,i]
@@ -164,9 +255,9 @@ function(CrosType,Gn=2,i,x,y=0){
         # ab/ab
         mtGeFre[g,1] <- 0.5*(mtGeFre[g-1,2]+mtGeFre[g-1,3]+(1-x)*mtGeFre[g-1,4])+mtGeFre[g-1,1]
         # ab/aB
-        mtGeFre[g,2] <- 0.5*(mtGeFre[g,2]+x*mtGeFre[g-1,4])
+        mtGeFre[g,2] <- 0.5*(mtGeFre[g-1,2]+x*mtGeFre[g-1,4])
         # ab/Ab
-        mtGeFre[g,3] <- 0.5*(mtGeFre[g,3]+x*mtGeFre[g-1,4])
+        mtGeFre[g,3] <- 0.5*(mtGeFre[g-1,3]+x*mtGeFre[g-1,4])
         # AB/AB
         mtGeFre[g,4] <- 0.5*(1-x)*mtGeFre[g-1,4]
       }
