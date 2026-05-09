@@ -44,10 +44,10 @@
 #' 
 #' \strong{Calculation Methods by Cross Type:}
 #' \itemize{
-#'   \item \strong{Fn populations}: Uses \code{\link{calculate_genotype_frequencies}} function for complex calculations
+#'   \item \strong{Fn populations}: Uses \code{\link{genotype_freq}} for complex calculations
 #'         involving multiple genotype classes
 #'   \item \strong{F2, DH, RIL}: Uses analytical formulas based on classical genetics
-#'   \item \strong{BCP1, BCP2}: Uses \code{\link{calculate_genotype_frequencies}} function with specific genotype indices
+#'   \item \strong{BCP1, BCP2}: Uses \code{\link{genotype_freq}} with specific genotype indices
 #' }
 #' 
 #' \strong{Mathematical Framework:}
@@ -68,34 +68,37 @@
 #' }
 #' 
 #' @examples
+#' \dontrun{
 #' # Calculate probability for F2 population with both flanking markers
-#' prob_f2 <- calculate_expected_genotype_distribution("22", "F2", Gn = 2, x = 0.1, y = 0.2)
+#' prob_f2 <- expected_genotype_dist("22", "F2", Gn = 2, x = 0.1, y = 0.2)
 #' 
 #' # Calculate probability for BCP1 with only right flanking marker
-#' prob_bcp1_n2 <- calculate_expected_genotype_distribution("N2", "BCP1", Gn = 3, x = 0.15, y = 0.25)
+#' prob_bcp1_n2 <- expected_genotype_dist("N2", "BCP1", Gn = 3, x = 0.15, y = 0.25)
 #' 
 #' # Calculate probability for DH population with only left flanking marker
-#' prob_dh_2n <- calculate_expected_genotype_distribution("2N", "DH", Gn = 2, x = 0.1, y = 0)
+#' prob_dh_2n <- expected_genotype_dist("2N", "DH", Gn = 2, x = 0.1, y = 0)
 #' 
 #' # Calculate probability for Fn population with both flanking markers
-#' prob_fn <- calculate_expected_genotype_distribution("21", "Fn", Gn = 4, x = 0.2, y = 0.3)
+#' prob_fn <- expected_genotype_dist("21", "Fn", Gn = 4, x = 0.2, y = 0.3)
 #' 
 #' # Calculate probability for RIL population
-#' prob_ril <- calculate_expected_genotype_distribution("00", "RIL", Gn = 2, x = 0.1, y = 0.2)
+#' prob_ril <- expected_genotype_dist("00", "RIL", Gn = 2, x = 0.1, y = 0.2)
 #' 
 #' # Example with different recombination fractions
-#' prob_low_rec <- calculate_expected_genotype_distribution("22", "F2", Gn = 2, x = 0.05, y = 0.05)
-#' prob_high_rec <- calculate_expected_genotype_distribution("22", "F2", Gn = 2, x = 0.3, y = 0.4)
+#' prob_low_rec <- expected_genotype_dist("22", "F2", Gn = 2, x = 0.05, y = 0.05)
+#' prob_high_rec <- expected_genotype_dist("22", "F2", Gn = 2, x = 0.3, y = 0.4)
+#' }
 #' 
-#' @seealso \code{\link{calculate_genotype_frequencies}} for genotype frequency calculations,
-#'          \code{\link{calculate_genotype_probabilities}} for missing genotype imputation
+#' @aliases calculate_expected_genotype_distribution
+#' @seealso \code{\link{genotype_freq}} for genotype frequency calculations,
+#'          \code{\link{genotype_prob}} for missing genotype imputation
 #' 
 #' @references
 #' Haldane, J.B.S. (1919). The combination of linkage values and the calculation of 
 #' distances between the loci of linked factors. Journal of Genetics, 8(3), 299-309.
 #' 
 #' @export
-calculate_expected_genotype_distribution <-
+expected_genotype_dist <-
 function(marType,croType,Gn=2,x,y=0){   
   if(Gn < 1){
     stop("Gn should > 0")
@@ -103,7 +106,7 @@ function(marType,croType,Gn=2,x,y=0){
   z <- x + y -2*x*y
   if(marType == "22"){
     if (croType=="BCP1"){
-      rval <- calculate_genotype_frequencies(croType,Gn+1,8,x,y)/(calculate_genotype_frequencies(croType,Gn+1,8,x,y)+calculate_genotype_frequencies(croType,Gn+1,6,x,y))
+      rval <- genotype_freq(croType,Gn+1,8,x,y)/(genotype_freq(croType,Gn+1,8,x,y)+genotype_freq(croType,Gn+1,6,x,y))
     }
     if (croType=="DH"){
       rval <- (1-x-y)/(1-z)
@@ -287,3 +290,6 @@ function(marType,croType,Gn=2,x,y=0){
   }
   return(rval)
 }
+
+# backward-compatible alias
+calculate_expected_genotype_distribution <- expected_genotype_dist

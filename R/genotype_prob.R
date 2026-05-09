@@ -75,6 +75,7 @@
 #' existing markers to improve mapping resolution and handle large gaps in the genetic map.
 #' 
 #' @examples
+#' \dontrun{
 #' # Example genetic map
 #' genetic_map <- data.frame(
 #'   marker = c("M1", "M2", "M3", "M4", "M5"),
@@ -94,29 +95,29 @@
 #' )
 #' 
 #' # Association mapping (no imputation)
-#' result_am <- calculate_genotype_probabilities(genetic_map, geno_data, method = "AM")
+#' result_am <- genotype_prob(genetic_map, geno_data, method = "AM")
 #' 
 #' # Linkage mapping for F2 population with imputation
-#' result_lm <- calculate_genotype_probabilities(genetic_map, geno_data, method = "LM", 
+#' result_lm <- genotype_prob(genetic_map, geno_data, method = "LM", 
 #'                         croType = "F2", steps = 0)
 #' 
 #' # Linkage mapping with virtual marker creation
-#' result_lm_vm <- calculate_genotype_probabilities(genetic_map, geno_data, method = "LM", 
+#' result_lm_vm <- genotype_prob(genetic_map, geno_data, method = "LM", 
 #'                            croType = "F2", steps = 5)
 #' 
 #' # RIL population example
-#' result_ril <- calculate_genotype_probabilities(genetic_map, geno_data, method = "LM", 
+#' result_ril <- genotype_prob(genetic_map, geno_data, method = "LM", 
 #'                          croType = "RIL", steps = 0)
-#' 
-#' @seealso \code{\link{haldane_mapping_function}} for recombination fraction calculations,
-#'          \code{\link{calculate_expected_genotype_distribution}} for expected genotype probabilities
+#' }
+#' @seealso \code{\link{haldane_map}} for recombination fraction calculations,
+#'          \code{\link{expected_genotype_dist}} for expected genotype probabilities
 #' 
 #' @references
 #' Haldane, J.B.S. (1919). The combination of linkage values and the calculation of 
 #' distances between the loci of linked factors. Journal of Genetics, 8(3), 299-309.
 #' 
 #' @export
-calculate_genotype_probabilities <- function(GeneticMap,GenoData,method,croType=NULL,steps=0,Gn=2){
+genotype_prob <- function(GeneticMap,GenoData,method,croType=NULL,steps=0,Gn=2){
     if(nrow(GeneticMap) != ncol(GenoData)){
       stop("Marker No. in geneticMap and GenoData must be equal\n")
     }
@@ -393,29 +394,17 @@ calculate_genotype_probabilities <- function(GeneticMap,GenoData,method,croType=
                     if (croType != "BCP1" & GenoData[nS,names(Chr_R)[jL]] %in% 0 & GenoData[nS,names(Chr_R)[jR]] %in% 0){
                       VMmatrix[nS,names(Chr_V)[jv]] <- round(calculate_expected_genotype_distribution("00",croType,Gn,ra,rb),digits=3)+1
                     }
-                  }
                 }
-              }#jv
-            }#nObs
-          }#jr
-        }#NoChr
-        VMmatrix <- round(VMmatrix,digits = 3)
-        RetValue <- rbind(geneticMap,VMmatrix)
-      }#steps
-    }else{
-      stop("method must be AM or LM")
-    }
-    
-    #* --------------------------
-    # create and set working dir
-    #*---------------------------
-    mainDir=getwd()
-    subDir="OUTPUT_GenoProb"
-    ifelse(!file.exists(file.path(mainDir, subDir)), dir.create(file.path(mainDir, subDir)), FALSE)
-    if(method=="AM"){
-      write.table(RetValue,file=paste(file.path(mainDir, subDir),"/GenoData_",method,".xls",sep=""),quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
-    }else if(method=="LM"){
-      write.table(RetValue,file=paste(file.path(mainDir, subDir),"/GenoData_step",steps,"_",method,".xls",sep=""),quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
-    }  
-    return(as.data.frame(RetValue))
+              }
+            }#jv
+          }#nObs
+        }#jr
+      }#NoChr
+      VMmatrix <- round(VMmatrix,digits = 3)
+      RetValue <- rbind(geneticMap,VMmatrix)
+    }#steps
+  }else{
+    stop("method must be AM or LM")
   }
+  return(as.data.frame(RetValue))
+}
