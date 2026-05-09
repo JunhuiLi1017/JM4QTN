@@ -1,0 +1,25 @@
+GeneticMap              Data about genetic map
+GenoData                Data about molecular markers genotype
+GenoData_EST            Data about information of molecular markers
+                        chromosome id, genetic distance position and
+                        genotype with estimated missing markers
+GenoData_S2             Data about information of molecular markers
+                        chromosome id, genetic distance position and
+                        estimated missing markers genotype with steps =
+                        2
+JM4QTN-package          Joint Mapping for QTN
+PhenoData               Data about all phenotype
+expected_genotype_dist
+                        Expected Allele Genotype Distribution
+                        Calculator
+genotype_freq           Genotype Frequency Calculator for Genetic
+                        Populations
+genotype_prob           Calculate Genotype Probabilities and Impute
+                        Missing Data
+haldane_map             Haldane Mapping Function
+joint_map               Joint Mapping Analysis for Multiple Traits
+link_pleio              Linkage-Pleiotropy Analysis for QTL Detection
+perm_test_joint         Permutation Test for Joint Mapping Analysis
+perm_test_link_pleio    Permutation Test for Linkage-Pleiotropy
+                        Analysis
+pheno_stats             Statistical Analysis of Phenotype Data

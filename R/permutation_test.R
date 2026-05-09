@@ -67,8 +67,7 @@
 #'                      alpha = 0.1)
 #' }
 #' 
-#' @importFrom stats resid anova update terms lm det df.residual log10
-#' @importFrom StepReg stepwise
+#' @importFrom stats resid anova update terms lm df.residual
 #' 
 #' @export
 permutation_test <- function(formula, data, n=1000, alpha=0.1, include=NULL, strategy="bidirection", metric="SBC", type="linear"){
@@ -106,7 +105,10 @@ permutation_test <- function(formula, data, n=1000, alpha=0.1, include=NULL, str
   for(v in 1:n){
     data_pt[1:nobs,y_var] <- data[sample(1:nobs,nobs,replace=FALSE),y_var]
     
-    stepwise_var <- stepwise(formula, data_pt, type="linear", strategy = strategy, metric=metric, include=inlude_var)
+    stepwise_var <- StepReg::stepwise(
+      formula, data_pt, type = "linear", strategy = strategy, metric = metric,
+      include = inlude_var
+    )
     
     call_best <- stepwise_var[[strategy]][[metric]]
     formula_best <- call_best$call$formula

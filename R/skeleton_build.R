@@ -24,9 +24,7 @@
 #'   typically with a \code{call} and \code{call$formula}).
 #'
 #' @seealso \code{\link{joint_map}}, \code{\link{permutation_test}}
-#' 
-#' @importFrom StepReg stepwise
-#' 
+#'
 #' @export
 skeletion_build <- function(formula, data, type = "linear", strategy = "bidirection",
                             metric = "SL", include = NULL, cut_off_list) {
@@ -38,3 +36,8 @@ skeletion_build <- function(formula, data, type = "linear", strategy = "bidirect
   best_model <- stepwise_model[[strategy]][[metric]]
   best_model
 }
+
+#' @rdname skeletion_build
+#' @aliases skeleton_build
+#' @export
+skeleton_build <- skeletion_build

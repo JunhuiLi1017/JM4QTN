@@ -52,7 +52,10 @@
 #' cut_off_list <- permutation_test(formula1, data1, n=100,
 #'                      alpha = 0.1)
 #' 
-#' skeleton <- skeleton_build(formula1, data1, strategy="bidirection", metric="SL", cut_off_list = cut_off_list)
+#' skeleton <- skeletion_build(
+#'   formula1, data1, strategy = "bidirection", metric = "SL",
+#'   cut_off_list = cut_off_list
+#' )
 #' 
 #' results <- joint_map(formula1, data1, skeleton, include = "Popu", cut_off_list = cut_off_list)
 #' 
@@ -60,42 +63,46 @@
 #' 
 #' formula2 <- reformulate(terms, response = "cbind(Trait1,Trait2)")
 #' 
-#' cut_off_list <- permutation_test(formula1, data1, n=100,
-#'                      alpha = 0.1)
+#' cut_off_list <- permutation_test(formula2, data1, n = 100, alpha = 0.1)
 #' 
-#' skeleton <- skeleton_build(formula2, data1, strategy="bidirection", metric="SL", cut_off_list = cut_off_list)
+#' skeleton <- skeletion_build(
+#'   formula2, data1, strategy = "bidirection", metric = "SL",
+#'   cut_off_list = cut_off_list
+#' )
 #' 
 #' results <- joint_map(formula2, data1, skeleton, include = "Popu", cut_off_list = cut_off_list)
 #' 
 #' print(results)
 #'
 #' }
-#' @seealso \code{\link{perm_test_joint}} for permutation test thresholds,
-#'          \code{\link{link_pleio}} for linkage-pleiotropy analysis,
-#'          \code{\link{genotype_prob}} for genotype probability calculations
+#' @seealso \code{\link{permutation_test}} for permutation thresholds,
+#'   \code{\link{genotype_prob}} for genotype probability calculations
 #' 
 #' @references
 #' Jiang, C. and Zeng, Z.B. (1995). Multiple trait analysis of genetic mapping for 
 #' quantitative trait loci. Genetics, 140(3), 1111-1127.
 #' 
-#' @importFrom stats df.residual as.formula lm update det resid anova log10 terms
-#' @importFrom StepReg stepwise
+#' @importFrom stats anova as.formula df.residual lm resid terms update
 #' 
 #' @export
 #' 
 
 joint_map <- function(formula, data, skeleton, include, cut_off_list){
   nobs <- nrow(data)
+  call_best <- skeleton
   formula_best <- skeleton$call$formula
   term_form_best <- terms(formula_best, data = data)
   x_name_best <- attr(term_form_best, "term.labels")
+
+  resd_best <- resid(call_best)
+  mat_rss_best <- t(resd_best) %*% resd_best
+  det_rss_best <- base::det(mat_rss_best)
 
   x_name <- attr(terms(formula), "term.labels")
   inlude_var <- include
   continuous_check <- grepl(":", x_name)
   if(any(continuous_check)) {
     cont_class_var <- x_name[continuous_check]
-    front_var <- gsub(".*:", "", cont_class_var)
     back_var <- gsub(":.*", "", cont_class_var)
     inlude_var <- unique(back_var)
     data[,inlude_var] <- as.factor(data[,inlude_var])
@@ -114,22 +121,22 @@ joint_map <- function(formula, data, skeleton, include, cut_off_list){
       call_simple <- lm(formula_simple,data=data)
       resd_simple <- resid(call_simple)
       mat_rss_simple <- t(resd_simple) %*% resd_simple
-      det_rss_simple <- det(mat_rss_simple)
-      p_value[i] <- anova(call_best,call_simple)[2,"Pr(>F)"]
-      lod[i] <- 0.5*nobs*log10(det_rss_best/det_rss_simple)
+      det_rss_simple <- base::det(mat_rss_simple)
+      p_value[i] <- anova(call_simple, call_best)[2, "Pr(>F)"]
+      lod[i] <- 0.5 * nobs * log10(det_rss_simple / det_rss_best)
     }else{
       formula_full <- update(formula_best, as.formula(paste(". ~ . +", x)))
       call_full <- lm(formula_full,data=data)
       resd_full <- resid(call_full)
       mat_rss_full <- t(resd_full) %*% resd_full
-      det_rss_full <- det(mat_rss_full)
+      det_rss_full <- base::det(mat_rss_full)
       df_full <- df.residual(call_full)
       if(df_full == 0){
         p_value[i] <- 1
         lod[i] <- 0
       }else{
-        p_value[i] <- anova(call_full,call_simple)[2,"Pr(>F)"]
-        lod[i] <- 0.5*nobs*log10(det_rss_full/det_rss_simple)
+        p_value[i] <- anova(call_best, call_full)[2, "Pr(>F)"]
+        lod[i] <- 0.5 * nobs * log10(det_rss_best / det_rss_full)
       }
     }
   }

@@ -1,30 +1,17 @@
 Package: JM4QTN
 Type: Package
-Title: Joint Mapping for Quantitative Trait Nucleotides (QTN)
-Version: 2.0.0
-Date: 2025-08-13
-Author: Junhui Li, Wenxin Liu
-Maintainer: Junhui Li <junhuili@cau.edu.cn>
-Description: A comprehensive R package for joint mapping analysis of quantitative trait 
-    nucleotides (QTN) in genetic studies. The package implements sophisticated statistical 
-    methods for both Association Mapping (AM) and Linkage Mapping (LM) approaches to 
-    identify QTL affecting multiple traits simultaneously. Key features include: Joint 
-    mapping analysis for multiple traits using multivariate models, permutation testing 
-    for empirical significance threshold determination, linkage-pleiotropy analysis to 
-    distinguish between pleiotropic and linked QTL effects, missing genotype imputation 
-    using flanking marker information, virtual marker creation for improved mapping 
-    resolution, comprehensive statistical analysis including normality tests, ANOVA, 
-    and least squares means, support for various population types (F2, RIL, DH, 
-    backcross, advanced generations), stepwise regression with multiple information 
-    criteria for cofactor selection, and parametric bootstrap testing for hypothesis 
-    testing. The package combines composite interval mapping (CIM) and regression 
-    analysis to perform association mapping and linkage mapping, identifying pleiotropic 
-    or linked QTL in multiple traits across single or multiple line cross populations. 
-    It can compute conditional probabilities of missing marker genotypes using flanking 
-    markers and determine significance thresholds through permutation tests and 
-    parametric bootstrap tests.
+Title: Joint Mapping for Quantitative Trait Loci
+Version: 1.0.0
+Date: 2026-05-09
+Authors@R: c(person(given = "Junhui", family = "Li",
+           role = c("aut", "cre"),
+           email = "ljh.biostat@gmail.com"),
+           person(given = "Wenxin", family = "Liu",
+           role = "aut"))
+Description: A comprehensive R package for joint mapping analysis of quantitative trait loci in genetic studies.
 License: GPL (>= 2)
-Imports: lsmeans (>= 2.25.5), StepReg (>= 1.0.1)
+Imports: lsmeans (>= 2.25.5), StepReg (>= 1.5.0)
 Depends: R (>= 3.5.0)
 Encoding: UTF-8
+Language: en-US
 RoxygenNote: 7.3.2

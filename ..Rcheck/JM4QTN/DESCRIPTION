@@ -1,0 +1,14 @@
+Package: JM4QTN
+Type: Package
+Title: Joint Mapping for Quantitative Trait Nucleotides (QTN)
+Version: 1.0.0
+Date: 2026-04-27
+Author: Junhui Li, Wenxin Liu
+Maintainer: Junhui Li <ljh.biostat@gmail.com>
+Description: A comprehensive R package for joint mapping analysis of quantitative trait nucleotides (QTN) in genetic studies.
+License: GPL (>= 2)
+Imports: lsmeans (>= 2.25.5), StepReg (>= 1.5.0)
+Depends: R (>= 3.5.0)
+Encoding: UTF-8
+RoxygenNote: 7.3.2
+Built: R 4.4.1; ; 2026-05-01 20:22:59 UTC; unix

@@ -123,7 +123,7 @@ function(phenoData,defineForm=NULL,effNotation="G"){
     for(j in 1:(ncol(phenoData)-4)){
       lm0 <- lm(as.formula(Form[j]),data=phenoData)
       ano0 <- anova(lm0)
-      lms <- as.data.frame(predict(lsmeans(lm0,"G")))
+      lms <- as.data.frame(predict(lsmeans::lsmeans(lm0, "G")))
       colnames(lms) <- colnames(phenoData)[4+j]
       Phelist[[colnames(lms)]]["formula"] <- list(defineForm[j])
       Phelist[[colnames(lms)]]["ANOVA"] <- list(ano0)

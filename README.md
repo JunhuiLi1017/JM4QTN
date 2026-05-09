@@ -199,7 +199,7 @@ We welcome contributions! Please feel free to submit issues and pull requests.
 
 ## License
 
-This project is licensed under the GNU General Public License v2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v2.0 - see the [GNU GPLv2 license text](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) for details.
 
 ## Contact
 
