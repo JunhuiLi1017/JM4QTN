@@ -40,8 +40,9 @@
 #' }
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example phenotype data
+#' set.seed(1)
 #' pheno_data <- data.frame(
 #'   Trait1 = rnorm(200, mean = 100, sd = 15),
 #'   Trait2 = rnorm(200, mean = 50, sd = 8),
@@ -54,6 +55,8 @@
 #' colnames(geno_data) <- paste0("M", 1:50)
 #' 
 #' data1 <- cbind(pheno_data,geno_data)
+#' 
+#' data1$Popu <- as.factor(data1$Popu)
 #' 
 #' terms <- c("Popu", paste0(colnames(geno_data), ":Popu"))
 #' formula1 <- reformulate(terms, response = "Trait1")
@@ -132,7 +135,7 @@ permutation_test <- function(formula, data, n=1000, alpha=0.1, include=NULL, str
         mat_rss_simple <- t(resd_simple) %*% resd_simple
         det_rss_simple <- det(mat_rss_simple)
         p_value[i] <- anova(call_best,call_simple)[2,"Pr(>F)"]
-        lod[i] <- 0.5*nobs*log10(det_rss_best/det_rss_simple)
+        lod[i] <- abs(0.5*nobs*log10(det_rss_best/det_rss_simple))
       }else{
         formula_full <- update(formula_best, as.formula(paste(". ~ . +", x)))
         call_full <- lm(formula_full,data=data_pt)
@@ -144,8 +147,8 @@ permutation_test <- function(formula, data, n=1000, alpha=0.1, include=NULL, str
           p_value[i] <- 1
           lod[i] <- 0
         }else{
-          p_value[i] <- anova(call_full,call_simple)[2,"Pr(>F)"]
-          lod[i] <- 0.5*nobs*log10(det_rss_full/det_rss_simple)
+          p_value[i] <- anova(call_full,call_best)[2,"Pr(>F)"]
+          lod[i] <- abs(0.5*nobs*log10(det_rss_full/det_rss_best))
         }
       }
     }

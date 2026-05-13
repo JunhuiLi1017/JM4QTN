@@ -31,8 +31,9 @@
 #'   }
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example phenotype data
+#' set.seed(1)
 #' pheno_data <- data.frame(
 #'   Trait1 = rnorm(100, mean = 100, sd = 15),
 #'   Trait2 = rnorm(100, mean = 50, sd = 8),
@@ -46,6 +47,8 @@
 #' 
 #' data1 <- cbind(pheno_data,geno_data) 
 #' 
+#' data1$Popu <- as.factor(data1$Popu)
+#' 
 #' terms <- c("Popu", paste0(colnames(geno_data), ":Popu"))
 #' formula1 <- reformulate(terms, response = "Trait1")
 #' 
@@ -54,7 +57,7 @@
 #' 
 #' skeleton <- skeletion_build(
 #'   formula1, data1, strategy = "bidirection", metric = "SL",
-#'   cut_off_list = cut_off_list
+#'   cut_off_list = cut_off_list, include="Popu"
 #' )
 #' 
 #' results <- joint_map(formula1, data1, skeleton, include = "Popu", cut_off_list = cut_off_list)
@@ -63,11 +66,11 @@
 #' 
 #' formula2 <- reformulate(terms, response = "cbind(Trait1,Trait2)")
 #' 
-#' cut_off_list <- permutation_test(formula2, data1, n = 100, alpha = 0.1)
+#' cut_off_list <- permutation_test(formula2, data1, n = 50, alpha = 0.1)
 #' 
 #' skeleton <- skeletion_build(
 #'   formula2, data1, strategy = "bidirection", metric = "SL",
-#'   cut_off_list = cut_off_list
+#'   cut_off_list = cut_off_list, include="Popu"
 #' )
 #' 
 #' results <- joint_map(formula2, data1, skeleton, include = "Popu", cut_off_list = cut_off_list)

@@ -25,11 +25,13 @@
 #'
 #' @seealso \code{\link{joint_map}}, \code{\link{permutation_test}}
 #'
+#' @importFrom StepReg stepwise
+#'
 #' @export
 skeletion_build <- function(formula, data, type = "linear", strategy = "bidirection",
                             metric = "SL", include = NULL, cut_off_list) {
   cut_off_pvalue <- cut_off_list$cut_off["pvalue"]
-  stepwise_model <- StepReg::stepwise(
+  stepwise_model <- stepwise(
     formula, data, type = type, strategy = strategy, metric = metric,
     include = include, sle = cut_off_pvalue, sls = cut_off_pvalue
   )

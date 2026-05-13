@@ -66,7 +66,6 @@
 #' frequencies in the previous generation and the recombination fractions between loci.
 #' 
 #' @examples
-#' \dontrun{
 #' # Calculate frequency for F2 generation, genotype 1, with recombination fraction 0.1
 #' freq_f2 <- genotype_freq("Fn", generation = 2, genotype_index = 1, recomb_aq = 0.1, recomb_qb = 0)
 #' 
@@ -88,7 +87,6 @@
 #' # Example with different generation numbers
 #' freq_gen3 <- genotype_freq("Fn", generation = 3, genotype_index = 1, recomb_aq = 0.1, recomb_qb = 0)
 #' freq_gen5 <- genotype_freq("Fn", generation = 5, genotype_index = 1, recomb_aq = 0.1, recomb_qb = 0)
-#' }
 #' 
 #' @aliases calculate_genotype_frequencies
 #' 

@@ -68,38 +68,26 @@
 #' }
 #' 
 #' @examples
-#' \dontrun{
-#' # Calculate probability for F2 population with both flanking markers
-#' prob_f2 <- expected_genotype_dist("22", "F2", Gn = 2, x = 0.1, y = 0.2)
-#' 
-#' # Calculate probability for BCP1 with only right flanking marker
-#' prob_bcp1_n2 <- expected_genotype_dist("N2", "BCP1", Gn = 3, x = 0.15, y = 0.25)
-#' 
-#' # Calculate probability for DH population with only left flanking marker
-#' prob_dh_2n <- expected_genotype_dist("2N", "DH", Gn = 2, x = 0.1, y = 0)
-#' 
-#' # Calculate probability for Fn population with both flanking markers
-#' prob_fn <- expected_genotype_dist("21", "Fn", Gn = 4, x = 0.2, y = 0.3)
-#' 
+
 #' # Calculate probability for RIL population
 #' prob_ril <- expected_genotype_dist("00", "RIL", Gn = 2, x = 0.1, y = 0.2)
 #' 
 #' # Example with different recombination fractions
 #' prob_low_rec <- expected_genotype_dist("22", "F2", Gn = 2, x = 0.05, y = 0.05)
 #' prob_high_rec <- expected_genotype_dist("22", "F2", Gn = 2, x = 0.3, y = 0.4)
-#' }
 #' 
 #' @aliases calculate_expected_genotype_distribution
 #' @seealso \code{\link{genotype_freq}} for genotype frequency calculations,
 #'          \code{\link{genotype_prob}} for missing genotype imputation
 #' 
 #' @references
+#' 
 #' Haldane, J.B.S. (1919). The combination of linkage values and the calculation of 
 #' distances between the loci of linked factors. Journal of Genetics, 8(3), 299-309.
 #' 
 #' @export
 expected_genotype_dist <-
-function(marType,croType,Gn=2,x,y=0){   
+function(marType,croType,Gn=2,x,y=0){
   if(Gn < 1){
     stop("Gn should > 0")
   }
@@ -291,5 +279,3 @@ function(marType,croType,Gn=2,x,y=0){
   return(rval)
 }
 
-# backward-compatible alias
-calculate_expected_genotype_distribution <- expected_genotype_dist

@@ -40,5 +40,3 @@ function(x){
   return(r)
 }
 
-# backward-compatible alias
-haldane_mapping_function <- haldane_map

@@ -75,7 +75,6 @@
 #' existing markers to improve mapping resolution and handle large gaps in the genetic map.
 #' 
 #' @examples
-#' \dontrun{
 #' # Example genetic map
 #' genetic_map <- data.frame(
 #'   marker = c("M1", "M2", "M3", "M4", "M5"),
@@ -96,19 +95,13 @@
 #' 
 #' # Association mapping (no imputation)
 #' result_am <- genotype_prob(genetic_map, geno_data, method = "AM")
-#' 
-#' # Linkage mapping for F2 population with imputation
-#' result_lm <- genotype_prob(genetic_map, geno_data, method = "LM", 
-#'                         croType = "F2", steps = 0)
+#' result_am
 #' 
 #' # Linkage mapping with virtual marker creation
 #' result_lm_vm <- genotype_prob(genetic_map, geno_data, method = "LM", 
 #'                            croType = "F2", steps = 5)
+#' result_lm_vm
 #' 
-#' # RIL population example
-#' result_ril <- genotype_prob(genetic_map, geno_data, method = "LM", 
-#'                          croType = "RIL", steps = 0)
-#' }
 #' @seealso \code{\link{haldane_map}} for recombination fraction calculations,
 #'          \code{\link{expected_genotype_dist}} for expected genotype probabilities
 #' 

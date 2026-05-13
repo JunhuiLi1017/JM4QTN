@@ -8,8 +8,7 @@ Authors@R: c(person(given = "Junhui", family = "Li",
            email = "ljh.biostat@gmail.com"),
            person(given = "Wenxin", family = "Liu",
            role = "aut"))
-Description: A comprehensive R package for joint mapping analysis of quantitative trait loci in genetic studies.
-License: GPL (>= 2)
+Description: A comprehensive computational framework for joint mapping, developed by Junhui Li (2016; doi:10.11841/j.issn.1007-4333.2016.06.002), supports quantitative trait locus detection in structured genetic populations. It integrates robust phenotype summarization, computes genotype probabilities, and imputes missing markers for association and linkage mapping. Empirical significance thresholds are estimated via permutation testing coupled with stepwise regression. The framework enables genome-wide scans under both univariate and multivariate trait models, streamlining the discovery of complex genetic architectures.
 Imports: lsmeans (>= 2.25.5), StepReg (>= 1.5.0)
 Depends: R (>= 3.5.0)
 Encoding: UTF-8

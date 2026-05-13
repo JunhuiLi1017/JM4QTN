@@ -45,7 +45,7 @@
 #' }
 #' 
 #' @examples
-#' \dontrun{
+#' 
 #' # Example with multiple environments and blocks
 #' pheno_data <- data.frame(
 #'   E = rep(c("Env1", "Env2", "Env3"), each = 60),
@@ -74,7 +74,7 @@
 #'   "Weight ~ E + G + E:G"
 #' )
 #' results_custom <- pheno_stats(pheno_data, defineForm = custom_formulas)
-#' }
+#'
 #' @importFrom stats shapiro.test lm anova predict as.formula
 #' 
 #' @references
